@@ -3,6 +3,7 @@ import pandas as pd
 
 from ml_pre_proc.trendline import trendline_merger,trendline_preproc,trendline_compute,trendline_is_churn
 from ml_pre_proc.pre_proc import transactions_preproc,user_logs,merger,feautures_eng,date_encoding,under_balancing
+from model import drop_columns,get_X_y, build_pipeline
 
 # importing data using bigquery
 query = f"""
@@ -44,8 +45,25 @@ def data_processing(transactions_0_data,transactions_data,train_0_data,train_dat
 
     return churn_df_balanced
 
+#drop columns
+churn_df_balanced_clean = drop_columns(churn_df_balanced)
 
+#pipeline
+pipeline = build_pipeline()
 
+#X and y
+X, y = get_X_y(churn_df_balanced_clean)
+
+#fit the model
+fitted_model = pipeline.fit(X, y)
+
+#predict probability
+y_pred_proba = fitted_model.predict_proba(X)
 
 if __name__ == '__main__':
     data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
+    churn_df_balanced_clean = drop_columns(churn_df_balanced)
+    build_pipeline()
+    get_X_y(churn_df_balanced_clean)
+    fitted_model = pipeline.fit(X, y)
+    fitted_model.predict_proba(X)

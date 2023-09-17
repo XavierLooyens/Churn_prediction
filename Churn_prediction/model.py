@@ -77,7 +77,6 @@ def build_pipeline():
 
     return pipeline
 
-
 #fit the pipeline
 def fit_pipeline(pipeline, X, y):
     result = pipeline.fit(X, y)
