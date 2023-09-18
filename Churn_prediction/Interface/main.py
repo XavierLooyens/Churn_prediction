@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 import os
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from ml_pre_proc.trendline import trendline_merger,trendline_preproc,trendline_compute,trendline_is_churn
 from ml_pre_proc.pre_proc import transactions_preproc,user_logs,merger,feautures_eng,date_encoding,under_balancing
 from ml_pre_proc.data import get_data
+from ml_pre_proc.model import initialize_model
+import pickle
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/andretomaz/code/XavierLooyens/GCP/churn-prediction-398917-8a95102c50a6.json"
 
@@ -28,15 +28,29 @@ def data_processing(transactions_0_data,transactions_data,train_0_data,train_dat
     return churn_df_balanced
 
 #model
+def train_model(data_df):
+    # dropping unnecessary columns
+    data_df = data_df.drop(['Unnamed: 0','msno', 'bd', 'payment_method_id', 'city', 'registered_via'], axis=1)
 
+    #splitting features and target
+    X = data_df.drop(['is_churn'], axis=1)
+    y = data_df['is_churn']
 
-#prediction
+    #instatiating model and fitting
+    model = initialize_model()
+    result = model.fit(X, y)
+
+    # save the model to disk
+    filename = 'finalized_model.sav'
+    pickle.dump(result, open(filename, 'wb'))
+
+    return "model saved"
+
 
 
 if __name__ == '__main__':
     #importing data
     members_data, transactions_0_data, transactions_data, user_logs_data, train_0_data, train_data = get_data(gcp_project="churn-prediction-398917",data_has_header=True)
     # pre processing
-    data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
-    model
-    prediction
+    churn_df_balanced = data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
+    train_model(churn_df_balanced)

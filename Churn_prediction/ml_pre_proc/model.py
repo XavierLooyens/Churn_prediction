@@ -6,47 +6,28 @@ from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from joblib import dump
 
+def initialize_model():
+    #Create lists of features for their relevant scalers
+    robust_features = ['remaining_plan_duration',
+                       'usage_from_ltd',
+                       'payment_plan_days',
+                       'plan_list_price',
+                       'actual_amount_paid',
+                       'num_50',
+                       'num_75',
+                       'num_985',
+                       'expire_year',
+                       'last_transaction_year'
+    ]
 
+    minmax_features = ['registration_year']
 
-#Get the data from the csv file
-## this will need to be tweaked to get the data from the other .py scripts
-def get_data():
-    data_df= pd.read_csv("../raw_data/churn_df_underbalanced.csv")
-    return data_df
+    normal_features = [ 'num_25',
+                        'num_100'
+                        'num_unq'
+                        'total_secs',
+    ]
 
-#drop columns
-def drop_columns(data_df):
-    data_df = data_df.drop(['Unnamed: 0','msno', 'bd', 'payment_method_id', 'city', 'registered_via'], axis=1)
-    return data_df
-
-#create X and y
-def get_X_y(data_df):
-    X = data_df.drop(['is_churn'], axis=1)
-    y = data_df['is_churn']
-    return X, y
-
-#Create lists of features for their relevant scalers
-robust_features = ['remaining_plan_duration',
-                   'usage_from_ltd',
-                   'payment_plan_days',
-                   'plan_list_price',
-                   'actual_amount_paid',
-                   'num_50',
-                   'num_75',
-                   'num_985',
-                   'expire_year',
-                   'last_transaction_year'
-]
-minmax_features = ['registration_year']
-
-normal_features = [ 'num_25',
-                    'num_100'
-                    'num_unq'
-                    'total_secs',
-]
-
-#Pipeline
-def build_pipeline():
     #robust scaler for robust features that contain outliers
     robust_pipeline = make_pipeline(RobustScaler())
     #minmax scaler for features that have no outliers but are not normally distributed
@@ -77,11 +58,6 @@ def build_pipeline():
 
     return pipeline
 
-
-#fit the pipeline
-def fit_pipeline(pipeline, X, y):
-    result = pipeline.fit(X, y)
-    return result
 
 #predict churn
 def predict_churn(pipeline, X_test):
