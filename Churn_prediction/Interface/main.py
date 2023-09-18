@@ -1,30 +1,13 @@
 import numpy as np
 import pandas as pd
-
+import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from ml_pre_proc.trendline import trendline_merger,trendline_preproc,trendline_compute,trendline_is_churn
 from ml_pre_proc.pre_proc import transactions_preproc,user_logs,merger,feautures_eng,date_encoding,under_balancing
+from ml_pre_proc.data import get_data
 
-# importing data using bigquery
-query = f"""
-        SELECT {",".join(COLUMN_NAMES_RAW)}
-        FROM {GCP_PROJECT_WAGON}.{BQ_DATASET}.raw_{DATA_SIZE}"""
-
-data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("raw", f"query_{min_date}_{max_date}_{DATA_SIZE}.csv")
-data_query = get_data_with_cache(
-        query=query,
-        gcp_project=GCP_PROJECT,
-        cache_path=data_query_cache_path,
-        data_has_header=True
-    )
-
-#transactions_0_data =
-#transactions_data =
-#train_0_data =
-#train_data =
-#user_logs_data =
-#members_data =
-
-
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/andretomaz/code/XavierLooyens/GCP/churn-prediction-398917-8a95102c50a6.json"
 
 def data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data, members_data):
     trendline_df = trendline_merger(transactions_0_data,transactions_data,train_0_data,train_data)
@@ -44,8 +27,16 @@ def data_processing(transactions_0_data,transactions_data,train_0_data,train_dat
 
     return churn_df_balanced
 
+#model
 
+
+#prediction
 
 
 if __name__ == '__main__':
+    #importing data
+    members_data, transactions_0_data, transactions_data, user_logs_data, train_0_data, train_data = get_data(gcp_project="churn-prediction-398917",data_has_header=True)
+    # pre processing
     data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
+    model
+    prediction
