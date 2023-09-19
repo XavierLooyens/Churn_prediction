@@ -23,9 +23,9 @@ def initialize_model():
     minmax_features = ['registration_year']
 
     normal_features = [ 'num_25',
-                        'num_100'
-                        'num_unq'
-                        'total_secs',
+                        'num_100',
+                        'num_unq',
+                        'total_secs'
     ]
 
     #robust scaler for robust features that contain outliers
@@ -59,17 +59,4 @@ def initialize_model():
     return pipeline
 
 
-#predict churn
-def predict_churn(pipeline, X_test):
-    y_pred = pipeline.predict(X_test)
-    return y_pred
 
-#predict churn probability
-def predict_churn_proba(pipeline, X_test):
-    y_pred_proba = pipeline.predict_proba(X_test)
-    return y_pred_proba
-
-# saving the trained model
-def save_model(result):
-    dump(result, 'LogRegModel.joblib')
-    return None
