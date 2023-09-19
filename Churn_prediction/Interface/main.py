@@ -19,7 +19,7 @@ def data_processing(transactions_0_data,transactions_data,train_0_data,train_dat
 
     user_logs_df = user_logs(user_logs_data, transactions_df)
 
-    churn_df = merger(transactions_df,user_logs_df,members_data,trendline_df)
+    churn_df = merger(transactions_df,user_logs_df,members_data,trendline_df,train_data)
     churn_df = feautures_eng(churn_df)
 
     churn_df_encoded = date_encoding(churn_df)
@@ -30,7 +30,7 @@ def data_processing(transactions_0_data,transactions_data,train_0_data,train_dat
 #model
 def train_model(data_df):
     # dropping unnecessary columns
-    data_df = data_df.drop(['Unnamed: 0','msno', 'bd', 'payment_method_id', 'city', 'registered_via'], axis=1)
+    data_df = data_df.drop(['msno', 'bd', 'payment_method_id', 'city', 'registered_via'], axis=1)
 
     #splitting features and target
     X = data_df.drop(['is_churn'], axis=1)
@@ -44,13 +44,30 @@ def train_model(data_df):
     filename = 'finalized_model.sav'
     pickle.dump(result, open(filename, 'wb'))
 
-    return "model saved"
+    return result
 
 
 
 if __name__ == '__main__':
+    print("starting the process")
     #importing data
-    members_data, transactions_0_data, transactions_data, user_logs_data, train_0_data, train_data = get_data(gcp_project="churn-prediction-398917",data_has_header=True)
+    #gcp_project="churn-prediction-398917"
+    #members_data, transactions_0_data, transactions_data, user_logs_data, train_0_data, train_data = get_data(gcp_project)
+    #importing 1st transactions
+    transactions_0_data= pd.read_csv("../raw_data/transactions.csv")
+    #Importing Transactions data
+    transactions_data= pd.read_csv("../raw_data/transactions_v2.csv")
+    #Importing user logs data
+    user_logs_data = pd.read_csv("../raw_data/user_logs_v2.csv")
+    #importing members data
+    members_data= pd.read_csv("../raw_data/members_v3.csv")
+    # import first training dataset
+    train_0_data= pd.read_csv("../raw_data/train.csv")
+    # import training dataset
+    train_data = pd.read_csv("../raw_data/train_v2.csv")
+    print("data downloaded")
     # pre processing
     churn_df_balanced = data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
+    print("data Processed")
     train_model(churn_df_balanced)
+    print("model saved")

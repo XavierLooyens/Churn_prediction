@@ -42,9 +42,9 @@ def user_logs(user_logs_df,transactions_df_lt):
 
     return user_logs_atd
 
-def merger(transactions_df_lt,user_logs_atd,members_df,trendline_df):
+def merger(transactions_df_lt,user_logs_atd,members_df,trendline_df,train_data):
     # Merging transactions, user logs and members data to Train dataframe
-    train_df = train_df.merge(transactions_df_lt, on='msno', how='left')
+    train_df = train_data.merge(transactions_df_lt, on='msno', how='left')
     train_df = train_df.merge(user_logs_atd, on='msno', how='left')
     train_df = train_df.merge(members_df, on='msno', how='left')
     train_df = train_df.merge(trendline_df, on='msno', how='left')
