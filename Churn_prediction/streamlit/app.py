@@ -5,7 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-
+import pickle
+for sckit
 import joblib
 
 st.set_page_config(
@@ -16,10 +17,10 @@ st.set_page_config(
 st.title('Churn Prediction App')
 
 
-package = joblib.load("/home/nazneen/code/nazneen78/Churn_prediction_front_end/model /package.pkl")
-
-loaded_model = package["model"]
-loaded_preproc = package["preprocessor"]
+#package = joblib.load("/home/nazneen/code/nazneen78/Churn_prediction_front_end/model /package.pkl")
+filename = 'finalized_model.sav'
+loaded_model = pickle.load(open(filename, 'rb'))
+#loaded_preproc = package["preprocessor"]
 
 def main():
 
@@ -45,19 +46,17 @@ def main():
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         ids= df.msno
-        X_test= df.drop(['Unnamed: 0', "msno"], axis=1)
+        X_test= df.drop(['msno'], axis=1)
 
         st.sidebar.header("Please filter here: ")
 
         X_columns = X_test.columns.to_list()
-
-        X_transformed = loaded_preproc.fit_transform(X_test)
-        X_transformed = pd.DataFrame(X_transformed,
-                                    columns=X_columns
-                                    )
+        #pre_processor = predict_pipeline()
+        #X_transformed = pre_processor.fit_transform(X_test)
+        #X_transformed = pd.DataFrame(X_transformed,columns=X_columns)
 
         # make predictions
-        predict = loaded_model.predict_proba(X_transformed)*100
+        predict = loaded_model.predict_proba(X_test)*100
         new = pd.DataFrame({'id': ids, 'prediction percentage': predict[:,1]})
 
         # Get feature coefficients

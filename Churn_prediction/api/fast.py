@@ -1,5 +1,6 @@
 from fastapi import FastAPI,File,UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from ml_pre_proc.model import predict_pipeline
 import pickle
 import pandas as pd
 
@@ -20,6 +21,9 @@ app.add_middleware(
 @app.post("/uploadcsv/")
 def upload_csv(csv_file: UploadFile = File(...)):
     X_pred= pd.read_csv(csv_file.file)
+
+    X_pred_processed= predict_pipeline
+
     ids= X_pred.msno
 
     X_columns = X_pred.columns.to_list()
@@ -28,7 +32,3 @@ def upload_csv(csv_file: UploadFile = File(...)):
     prediction_df = pd.DataFrame({'id': ids, 'prediction percentage': prediction[:,1]})
 
     return prediction_df.to_dict()
-
-
-
-
