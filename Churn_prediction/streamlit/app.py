@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import pickle
-for sckit
 import joblib
 
 st.set_page_config(
