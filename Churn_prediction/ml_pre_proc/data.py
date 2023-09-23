@@ -1,12 +1,11 @@
 import pandas as pd
 from google.cloud import bigquery
 import os
+from pathlib import Path
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/andretomaz/code/XavierLooyens/GCP/churn-prediction-398917-8a95102c50a6.json"
 
 def get_data(gcp_project):
-
-
     query = """
             SELECT *
             FROM churn-prediction-398917.churn_prediction.members_v3
