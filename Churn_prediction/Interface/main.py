@@ -5,7 +5,7 @@ from ml_pre_proc.trendline import trendline_merger,trendline_preproc,trendline_c
 from ml_pre_proc.pre_proc import transactions_preproc,user_logs,merger,feautures_eng,date_encoding,under_balancing
 from ml_pre_proc.data import get_data
 from ml_pre_proc.model import initialize_model
-import pickle
+import joblib
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/andretomaz/code/XavierLooyens/GCP/churn-prediction-398917-8a95102c50a6.json"
 
@@ -41,8 +41,7 @@ def train_model(data_df):
     result = model.fit(X, y)
 
     # save the model to disk
-    filename = 'finalized_model.sav'
-    pickle.dump(result, open(filename, 'wb'))
+    joblib.dump(result, 'model.pkl')
 
     return result
 
@@ -51,23 +50,15 @@ def train_model(data_df):
 if __name__ == '__main__':
     print("starting the process")
     #importing data
-    #gcp_project="churn-prediction-398917"
-    #members_data, transactions_0_data, transactions_data, user_logs_data, train_0_data, train_data = get_data(gcp_project)
-    #importing 1st transactions
-    transactions_0_data= pd.read_csv("../raw_data/transactions.csv")
-    #Importing Transactions data
-    transactions_data= pd.read_csv("../raw_data/transactions_v2.csv")
-    #Importing user logs data
-    user_logs_data = pd.read_csv("../raw_data/user_logs_v2.csv")
-    #importing members data
-    members_data= pd.read_csv("../raw_data/members_v3.csv")
-    # import first training dataset
-    train_0_data= pd.read_csv("../raw_data/train.csv")
-    # import training dataset
-    train_data = pd.read_csv("../raw_data/train_v2.csv")
-    print("data downloaded")
-    # pre processing
-    churn_df_balanced = data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
+    gcp_project="churn-prediction-398917"
+    cache_path = "/Users/andretomaz/code/XavierLooyens/Churn_prediction/raw_data/Cache/churn_df_balanced.csv"
+    if not os.path.isfile(cache_path):
+        members_data, transactions_0_data, transactions_data, user_logs_data, train_0_data, train_data = get_data(gcp_project)
+        print("data downloaded")
+        # pre processing
+        churn_df_balanced = data_processing(transactions_0_data,transactions_data,train_0_data,train_data,user_logs_data,members_data)
+        churn_df_balanced.to_csv(cache_path)
     print("data Processed")
+    churn_df_balanced = pd.read_csv(cache_path)
     train_model(churn_df_balanced)
     print("model saved")
