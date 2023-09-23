@@ -17,8 +17,10 @@ st.title('Churn Prediction App')
 
 
 #package = joblib.load("/home/nazneen/code/nazneen78/Churn_prediction_front_end/model /package.pkl")
-filename = 'finalized_model.sav'
-loaded_model = pickle.load(open(filename, 'rb'))
+
+package = joblib.load("../Churn_prediction/model.pkl")
+loaded_model = package.named_steps['classifier']
+# loaded_preproc = package.named_steps['preprocessor']
 #loaded_preproc = package["preprocessor"]
 
 def main():
@@ -55,7 +57,7 @@ def main():
         #X_transformed = pd.DataFrame(X_transformed,columns=X_columns)
 
         # make predictions
-        predict = loaded_model.predict_proba(X_test)*100
+        predict = (loaded_model.predict_proba(X_test)*100).astype(int)
         new = pd.DataFrame({'id': ids, 'prediction percentage': predict[:,1]})
 
         # Get feature coefficients
@@ -66,7 +68,7 @@ def main():
 
 
         st.subheader("predictions:")
-        st.table(new)
+        st.table(new.head(10))
 
         st.subheader('Feature Coefficients:')
         feature_importance_df= pd.DataFrame(feature_coefficients)
