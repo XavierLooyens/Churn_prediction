@@ -7,7 +7,9 @@ from sklearn.linear_model import LogisticRegression
 from joblib import dump
 
 def initialize_model():
-    #Create lists of features for their relevant scalers
+    '''
+    Create lists of features for their relevant scalers
+    '''
     robust_features = ['remaining_plan_duration',
                        'usage_from_ltd',
                        'payment_plan_days',
@@ -57,4 +59,3 @@ def initialize_model():
     ])
 
     return pipeline
-
