@@ -5,8 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-
+from sklearn.linear_model import LogisticRegression
 import joblib
+from io import StringIO
 
 st.set_page_config(
         page_title="Churn Prediction App",
@@ -16,10 +17,9 @@ st.set_page_config(
 st.title('Churn Prediction App')
 
 
-package = joblib.load("/home/nazneen/code/nazneen78/Churn_prediction_front_end/model /package.pkl")
-
-loaded_model = package["model"]
-loaded_preproc = package["preprocessor"]
+package = joblib.load("/home/nazneen/code/XavierLooyens/Churn_prediction/Churn_prediction/streamlit/model.pkl")
+loaded_model = package.named_steps['classifier']
+loaded_preproc = package.named_steps['preprocessor']
 
 def main():
 
@@ -33,94 +33,129 @@ def main():
     2. The file should have the same columns as the training data.
     3. After uploading, click the 'Predict' button to see predictions.
 
-    Example CSV format:
-    ```csv
-    Unnamed: 0,msno,feature1,feature2, ...
-    0,12345,0.5,0.3, ...
-    1,67890,0.2,0.7, ...
-    ```
     """)
+    def categorize_churn_risk(churn_probabilities):
+        # Categorize users based on predicted churn percentages
+        risk_categories = []
+        for prob in churn_probabilities:
+            if prob >= 90:
+                risk_categories.append("High Risk")
+            elif prob >= 50:
+                risk_categories.append("Medium Risk")
+            else:
+                risk_categories.append("Low Risk")
+        return risk_categories
+
 
 
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
+        # test with 10 rows-- to delete later
         ids= df.msno
-        X_test= df.drop(['Unnamed: 0', "msno"], axis=1)
+        X_test= df.drop(['msno', 'is_churn', 'bd','payment_method_id', 'city', 'registered_via'], axis=1)
 
         st.sidebar.header("Please filter here: ")
 
-        X_columns = X_test.columns.to_list()
+        if st.button("Predict"):
 
-        X_transformed = loaded_preproc.fit_transform(X_test)
-        X_transformed = pd.DataFrame(X_transformed,
-                                    columns=X_columns
-                                    )
+            X_columns = X_test.columns.to_list()
+            # pre_processor = predict_pipeline()
+            X_transformed = loaded_preproc.fit_transform(X_test)
+            X_transformed = pd.DataFrame(X_transformed,columns=X_columns)
 
-        # make predictions
-        predict = loaded_model.predict_proba(X_transformed)*100
-        new = pd.DataFrame({'id': ids, 'prediction percentage': predict[:,1]})
+            # # uploaded data
+            # st.subheader("Uploaded Data:")
+            # st.write(df)
 
-        # Get feature coefficients
-        feature_coefficients = pd.DataFrame({'Feature': X_test.columns, 'Coefficient': abs(loaded_model.coef_[0])})
-        feature_coefficients = feature_coefficients.sort_values(by='Coefficient', ascending=False)
+            # make predictions
+            predict = loaded_model.predict_proba(X_transformed)*100
+            pred = predict[:,1].astype(float)
+            new = pd.DataFrame({'ID': ids, 'Prediction percentage': predict[:,1]})
+
+            st.subheader("predictions:")
+            st.table(new.head(10))
+
+            st.subheader("Churn Statistics")
+
+            churn_count = new['Prediction percentage'].apply(lambda x: 'Churn' if x >= 50 else 'No Churn')
+            churn_counts = churn_count.value_counts()
+
+            fig = px.pie(new, values=churn_counts.values, names=churn_counts.index, title='Churn Distribution')
+            fig.update_traces(
+                textposition='inside',
+                textinfo='percent+label',
+                pull=[0.1, 0.1],
+                hole=0.3,
+                )
+            fig.update_layout(
+                    margin=dict(l=0, r=0, b=0, t=40),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                )
+            st.plotly_chart(fig)
 
 
+            churn_risks = categorize_churn_risk(new['Prediction percentage'])
+
+            # Create a DataFrame with user IDs and their corresponding churn risks
+            risk_df = pd.DataFrame({'ID': ids, 'Churn Risk': churn_risks})
+
+            high_risk_df = risk_df[risk_df['Churn Risk'] == 'High Risk']
+            medium_risk_df = risk_df[risk_df['Churn Risk'] == 'Medium Risk']
+            low_risk_df = risk_df[risk_df['Churn Risk'] == 'Low Risk']
+
+            # Display risk categories in three separate columns
+            st.subheader("Churn Risk Categories:")
+
+            col1, col2, col3 = st.columns(3)
 
 
-        st.subheader("predictions:")
-        st.table(new)
+            col1.subheader("High Risk")
+            col1.table(high_risk_df["ID"].head(10))
+            col_1 = pd.DataFrame(high_risk_df["ID"]).to_csv(index=False).encode('utf-8')
 
-        st.subheader('Feature Coefficients:')
-        feature_importance_df= pd.DataFrame(feature_coefficients)
-        fig1 = px.bar(
-            feature_importance_df,
-            x='Feature',
-            y='Coefficient',
-            # color='Sign',
-            title='Feature Importance Based on Coefficients'
-        )
-
-        # Customize the layout
-        fig1.update_layout(
-            xaxis_title='Feature',
-            yaxis_title='Coefficient',
-            showlegend=True,
-            barmode='relative',
-        )
-        # st.plotly_chart(fig1)
-
-        st.subheader("Churn Statistics")
-
-        churn_count = new['prediction percentage'].apply(lambda x: 'Churn' if x >= 50 else 'No Churn')
-        churn_counts = churn_count.value_counts()
-
-        fig = px.pie(new, values=churn_counts.values, names=churn_counts.index, title='Churn Distribution')
-        fig.update_traces(
-            textposition='inside',
-            textinfo='percent+label',
-            pull=[0.1, 0.1],
-            hole=0.3,
+            col1.download_button(
+                label="Download data as CSV",
+                data=col_1,
+                file_name='High_risk_df.csv',
+                mime='text/csv',
             )
-        fig.update_layout(
-                margin=dict(l=0, r=0, b=0, t=40),
-                paper_bgcolor='rgba(0,0,0,0)',
+
+
+            col2.subheader("Medium Risk")
+            col2.table(medium_risk_df["ID"].head(10))
+            col_2 = pd.DataFrame(medium_risk_df["ID"]).to_csv(index=False).encode('utf-8')
+
+            col2.download_button(
+                label="Download data as CSV",
+                data=col_2,
+                file_name='Medium_risk_df.csv',
+                mime='text/csv',
             )
-        # st.plotly_chart(fig)
-
-        left_column, right_column = st.columns(2)
-        left_column.plotly_chart(fig1, use_container_width=True)
-        right_column.plotly_chart(fig, use_container_width=True)
-
-        # # Hide streamlit style
-
-        hide_st_style = """
-        <style>
-        #MainMenu {visibility:hidden;}
-        footer {visibility:hidden;}
-        header {visibility:hidden;}
-        </style>"""
-
-        st.markdown(hide_st_style, unsafe_allow_html=True)
 
 
-main()
+            col3.subheader("Low Risk")
+            col3.table(low_risk_df["ID"].head(10))
+            col_3 = pd.DataFrame(low_risk_df["ID"]).to_csv(index=False).encode('utf-8')
+
+            col3.download_button(
+                label="Download data as CSV",
+                data=col_3,
+                file_name='Low_risk_df.csv',
+                mime='text/csv',
+            )
+
+
+        # # # Hide streamlit style
+
+        # hide_st_style = """
+        # <style>
+        # #MainMenu {visibility:hidden;}
+        # footer {visibility:hidden;}
+        # header {visibility:hidden;}
+        # </style>"""
+
+        # st.markdown(hide_st_style, unsafe_allow_html=True)
+
+
+if __name__ == '__main__':
+    main()
