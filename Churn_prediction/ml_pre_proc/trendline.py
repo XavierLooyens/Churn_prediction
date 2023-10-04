@@ -2,9 +2,15 @@ import pandas as pd
 import numpy as np
 
 def trendline_merger(transactions_0_df,transactions_df,train_0_df,train_df):
-    #concat vertically
-    #drop duplicates
-    #merging tables
+    """
+    Concatenates and drops the duplicates of the transaction data vertically,
+    Concatenated and drops the duplicates of the train data vertically
+
+    Returns:
+        - Dataframe of merged transactions and train data.
+
+    """
+
     transactions_df_concat = pd.concat([transactions_0_df, transactions_df], axis=0)
     train_df_concat = pd.concat([train_0_df, train_df], axis=0)
 
@@ -16,8 +22,12 @@ def trendline_merger(transactions_0_df,transactions_df,train_0_df,train_df):
     return transactions_train_df
 
 def trendline_preproc(transactions_train_df):
-    #convert to datetime
-    # Sort the DataFrame by 'msno' and 'transaction_date'
+    """
+    Converts date features into a datetime object.
+
+    Returns:
+        - Dataframe sorted by 'msno' and 'transaction_date
+    """
     transactions_train_df.loc[:,'transaction_date'] = pd.to_datetime(transactions_train_df['transaction_date'], format='%Y%m%d')
     transactions_train_df.loc[:,'membership_expire_date'] = pd.to_datetime(transactions_train_df['membership_expire_date'], format='%Y%m%d')
 
@@ -26,7 +36,12 @@ def trendline_preproc(transactions_train_df):
     return transactions_train_df
 
 def trendline_compute(transactions_train_df):
-    #compute previous period churns
+    """
+    Computes previous period churns
+
+    Returns:
+        -Dataframe with previous periods churn information as new features
+    """
     transactions_train_df['transaction_date_-1'] = transactions_train_df.groupby('msno')['transaction_date'].shift(+1)
     transactions_train_df['membership_expire_date_-1'] = transactions_train_df.groupby('msno')['membership_expire_date'].shift(+1)
     transactions_train_df['period_0'] = transactions_train_df['membership_expire_date_-1']-transactions_train_df['transaction_date']
@@ -64,8 +79,13 @@ def trendline_compute(transactions_train_df):
     return transactions_train_df
 
 def trendline_is_churn(transactions_train_df):
-    #only keeping rows with the latest transactions
-    #removing unnecessary columns
+    """
+    Removes unnecessary columns and keeps rows with the latest transactions
+
+    Returns:
+        - Dataframe with the final trendline
+
+    """
     latest_transaction_indexes = transactions_train_df.groupby('msno')['transaction_date'].idxmax()
     latest_transactions_with_churn = transactions_train_df.loc[latest_transaction_indexes]
 
