@@ -3,9 +3,14 @@ from google.cloud import bigquery
 import os
 from pathlib import Path
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/andretomaz/code/XavierLooyens/GCP/churn-prediction-398917-8a95102c50a6.json"
 
 def get_data(gcp_project):
+    """
+    Queries Google big query to retrive needed data from the bucket
+
+    Returns:
+        - Dataframes: members_v3, transactions, transactions_v2, user_logs_v2, train, train_v2
+    """
     query = """
             SELECT *
             FROM churn-prediction-398917.churn_prediction.members_v3

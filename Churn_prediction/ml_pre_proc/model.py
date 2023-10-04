@@ -7,9 +7,13 @@ from sklearn.linear_model import LogisticRegression
 from joblib import dump
 
 def initialize_model():
-    '''
+    """
     Create lists of features for their relevant scalers
-    '''
+    Create pipeline with model
+
+    Returns:
+        - Pipeline
+    """
     robust_features = ['remaining_plan_duration',
                        'usage_from_ltd',
                        'payment_plan_days',
@@ -30,16 +34,12 @@ def initialize_model():
                         'total_secs'
     ]
 
-    #robust scaler for robust features that contain outliers
     robust_pipeline = make_pipeline(RobustScaler())
-    #minmax scaler for features that have no outliers but are not normally distributed
     minmax_pipeline = make_pipeline(MinMaxScaler())
-    #logarithmic transformation of the normal features and then standard scaler
     log_pipeline = make_pipeline(
         FunctionTransformer(np.log1p, validate=True),
         StandardScaler())
 
-    #preprocessor
     preprocessor = ColumnTransformer(
         transformers=[
             ('Robust', robust_pipeline, robust_features),
@@ -48,11 +48,8 @@ def initialize_model():
         ], remainder='passthrough'
     )
 
-    #model
     model = LogisticRegression()
 
-
-    #preprocessor + model
     pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor),
         ('classifier', model)
