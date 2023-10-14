@@ -22,9 +22,9 @@ The objective of this specific project was to predict probability for users of t
  - Churning predictions made in the form of probabilities
  - Website created using Streamlit to present predictions.
  - Streamlit app devides churners into buckets of likelihood off churning:
-    - <50% likelihood: low risk
-    - >50% and <90% likelihood: medium risk
-    - >90% likelihood: high risk
+    - likelihood < 50% : low risk
+    - 50% < likelihood <90% : medium risk
+    - likelihood > 90% : high risk
  - Streamlit app provides options to download user ID's to use for targeting. 
 
 ## Confusion matrix 
