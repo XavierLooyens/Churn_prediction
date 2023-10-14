@@ -5,7 +5,10 @@
 
 
 # CHURN?
-Churn rate is a measure of the proportion of individuals or items moving out of a group over a specific period. The objective of this project was to predict the churning probability for users of the music streaming plattform - KKBOX
+Churn rate is a measure of the proportion of individuals or items moving out of a group over a specific period. 
+Based on that, churners are the people leaving the group. Many businesses know what their churn rate is, however they do not know who is churning. Being able to identify which users are more likely to churn offers an opportunity to save money for businesses. 
+
+The objective of this specific project was to predict probability for users of the music streaming plattform - KKBOX
 
 ## Solution Structure
  - Data store and retrieved from Google Cloud Platform (GCP) using BigQuery
@@ -16,6 +19,13 @@ Churn rate is a measure of the proportion of individuals or items moving out of 
  - Used data relating to over 50K users to train the model.
  - Churning predictions made in the form of a probability.
  - Website created using Streamlit to present predictions. A recommendation given for what actions to take based on the probability of a user churning.
+
+##Links
+Link to Streamlit: https://churnpredictfrontend-splvw2mkwctb829dm24nc5.streamlit.app/
+Link to Streamlit GitHub: https://github.com/XavierLooyens/Churn_prediction_frontend
+Link to presentation: https://www.canva.com/design/DAFvRLK95Q4/XiRhcHtFOIWwD1UywEjBvQ/view
+Link to data: https://www.kaggle.com/c/kkbox-churn-prediction-challenge/data
+
 
 ## Feature Importance
 
