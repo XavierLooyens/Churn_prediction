@@ -8,7 +8,7 @@
 Churn rate is a measure of the proportion of individuals or items moving out of a group over a specific period. 
 Based on that, churners are the people leaving the group. Many businesses know what their churn rate is, however, they do not know who is churning. Being able to identify which users are more likely to churn offers an opportunity to save money for businesses. 
 
-The objective of this specific project was to predict probability for users of the music streaming platform - KKBOX
+The objective of this specific project was to predict probability of churning for users of the music streaming platform - KKBOX
 
 ## Solution Structure 
  - Data stored and retrieved from Google Cloud Platform (GCP) using BigQuery
